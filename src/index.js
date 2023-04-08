@@ -4,8 +4,12 @@ const PORT = process.env.PORT || 3000
 require('dotenv').config({})
 
 
+const upload = require('./aws/aws.s3')
+const uploadMulter = require('./middlewares/upload')
 
-const s3 = require('./aws/aws.s3')
+
+app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
 
 
 
@@ -17,10 +21,16 @@ app.get('/', function (req, res) {
 
 
 
-app.post('/upload', function (req, res) {
+app.post('/upload', uploadMulter.single('file'), async function (req, res) {
 
-    console.log(s3);
-    res.send('Welcome')
+    try {
+        const t0 = performance.now();
+        let data = await upload(req.file.buffer, req.file.originalname);
+        const t1 = performance.now();
+        res.json({ time: `${t1 - t0}ms`, data })
+    } catch (err) {
+        res.json({message: err.message})
+    }
 })
 
 
