@@ -12,7 +12,7 @@ const upload = (fileContent, fileName) => {
         s3.send(new PutObjectCommand(params))
             .then((data) => {
                 if (data.$metadata.httpStatusCode === 200)
-                    resolve(`https://${process.env.BUCKET_NAME}.${process.env.REGION}.amazonaws.com/${fileName}`)
+                    resolve(`https://${process.env.BUCKET_NAME}.s3.${process.env.REGION}.amazonaws.com/${fileName}`)
             })
             .catch(err => {
                 reject(err)
