@@ -1,0 +1,31 @@
+<h1>Welcome to File Converter</h1>
+
+<a href="/"><h2>Home</h2></a>
+<br><br><br>
+
+<div class="form">
+    <label style="font-size: 20px;">Convert video to mp3</label>
+    <br>
+    <hr>
+    <br>
+    <form action="/convert" method="POST" enctype="multipart/form-data">
+        <input type="file" id="myfile" name="files" multiple="multiple">
+        <button>Convert</button>
+    </form>
+</div>
+
+
+
+
+
+
+<br><br><br>
+
+
+<div class="download">
+    <% files.forEach(function(file) { %>
+        <a href="<%= file.url %>" ><%= file.name %></a> <br><br><br>
+    <% }); %>
+
+    
+</div>

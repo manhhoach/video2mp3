@@ -6,8 +6,8 @@ const moment = require('moment-timezone')
 const upload = (fileContent, fileName) => {
     return new Promise((resolve, reject) => {
 
-        const expiredTime = moment().tz('Asia/Ho_Chi_Minh').add(1, 'minute').utc(true).toDate()
-
+        //const expiredTime = moment().tz('Asia/Ho_Chi_Minh').add(1, 'minute').utc(true).toDate()
+        const expiredTime = new Date(new Date()+6*60*1000)
         const params = {
             Bucket: process.env.BUCKET_NAME,
             Key: fileName,
