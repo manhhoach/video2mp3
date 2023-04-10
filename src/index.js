@@ -10,6 +10,9 @@ const { convertVideoToMp3 } = require('./helpers/convert')
 const { getFileName } = require('./helpers/getFileName')
 const { removeVietnameseTones } = require('./helpers/removeVietnameseTones')
 
+const JSZip = require('jszip');
+const { promisify } = require('util');
+const pipeline = promisify(require('stream').pipeline);
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
@@ -25,24 +28,43 @@ app.get('/', function (req, res) {
 
 
 
-app.post('/convert', uploadMulter.array('files'), async function (req, res) {
+app.post('/convert-single', uploadMulter.single('file'), async function (req, res) {
 
     try {
-        //  const t0 = performance.now();
-        //  const t1 = performance.now();
-        let data = await Promise.all(
+        let audioBuffer = await convertVideoToMp3(req.file.buffer)
+        let fileName = getFileName(req.file.originalname)
+        fileName = removeVietnameseTones(fileName)
+        res.set('Content-Type', 'audio/mp3');
+        res.set('Content-Disposition', `attachment; filename="${fileName}.mp3"`);
+        res.send(audioBuffer);
+
+    } catch (err) {
+        res.json({ message: err.message })
+    }
+})
+
+
+
+app.post('/convert-multiple', uploadMulter.array('files'), async function (req, res) {
+
+    try {
+        let zip = new JSZip();
+        await Promise.all(
             req.files.map(async (file) => {
                 let audioBuffer = await convertVideoToMp3(file.buffer)
                 let fileName = getFileName(file.originalname)
                 fileName = removeVietnameseTones(fileName)
-                let url = await upload(audioBuffer, `${fileName}.mp3`);
-                return {
-                    url: url,
-                    name: fileName
-                }
+                zip.file(`${fileName}.mp3`, audioBuffer);
             })
         )
-        res.render('index2', { files: data })
+
+        res.set({
+            'Content-Type': 'application/zip',
+            'Content-Disposition': `attachment; filename=converted.zip`
+        });
+        await pipeline(zip.generateNodeStream({ type: 'nodebuffer' }), res);
+
+
     } catch (err) {
         res.json({ message: err.message })
     }
@@ -52,7 +74,8 @@ app.post('/convert', uploadMulter.array('files'), async function (req, res) {
 
 
 
-
 app.listen(PORT, function () {
     console.log(`App listening on http://localhost:${PORT}`);
 })
+//  const t0 = performance.now();
+//  const t1 = performance.now();

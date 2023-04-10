@@ -1,19 +1,31 @@
 <h1>Welcome to File Converter</h1>
 
 <a href="/"><h2>Home</h2></a>
-<br><br><br>
+<br><br>
 
 <div class="form">
-    <label style="font-size: 20px;">Convert video to mp3</label>
+    <label style="font-size: 20px;">Convert video to mp3 (Single)</label>
     <br>
     <hr>
     <br>
-    <form action="/convert" method="POST" enctype="multipart/form-data">
-        <input type="file" id="myfile" name="files" multiple="multiple">
+    <form action="/convert-single" method="POST" enctype="multipart/form-data">
+        <input type="file" id="myfile" name="file">
         <button>Convert</button>
     </form>
 </div>
 
+<br><br><br><br>
+
+<div class="form">
+    <label style="font-size: 20px;">Convert video to mp3 (Multiple)</label>
+    <br>
+    <hr>
+    <br>
+    <form action="/convert-multiple" method="POST" enctype="multipart/form-data">
+        <input type="file" id="myfile" name="files" multiple="multiple">
+        <button>Convert</button>
+    </form>
+</div>
 
 
 
