@@ -1,30 +1,42 @@
-<h1>Welcome to File Converter</h1>
-
-<br>
-
-<div class="container">
+<div class="container" style="display: flex; align-items: center; justify-content: center; flex-direction: column;">
+    <h1>Welcome to File Converter</h1>
+    <br>
     <div class="form">
-        <label style="font-size: 20px;">Convert video to mp3 (Single)</label>
+        <label style="font-size: 20px;border-bottom: 2px solid #333; padding-bottom: 5px;">Convert video to mp3
+            (Single)</label>
         <br>
-        <hr>
         <br>
         <form action="/convert-single" method="POST" enctype="multipart/form-data">
             <input type="file" id="myfile" name="file">
-            <button>Convert</button>
+            <label>Choose bit rate</label>
+            <select name="bitrate">
+                <option value="128">128</option>
+                <option value="320">320</option>
+            </select>
+            <span>kbps</span>
+            <button style="margin-left: 2rem;">Convert</button>
         </form>
     </div>
-    
+
+
     <br><br><br><br>
-    
+
     <div class="form">
-        <label style="font-size: 20px;">Convert video to mp3 (Multiple)</label>
+        <label style="font-size: 20px;border-bottom: 2px solid #333; padding-bottom: 5px;">Convert video to mp3
+            (Multiple)</label>
         <br>
-        <hr>
         <br>
         <form action="/convert-multiple" method="POST" enctype="multipart/form-data">
             <input type="file" id="myfile" name="files" multiple="multiple">
-            <button>Convert</button>
+            <label>Choose bit rate</label>
+            <select name="bitrate">
+                <option value="128">128</option>
+                <option value="320">320</option>
+            </select>
+            <span>kbps</span>
+            <button style="margin-left: 2rem;">Convert</button>
         </form>
     </div>
+    <p style="margin-top: auto; text-align: center;position: absolute; bottom: 10">© 2023 - Một sản phẩm của Mạnh Hoạch
+    </p>
 </div>
-

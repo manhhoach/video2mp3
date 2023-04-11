@@ -19,7 +19,8 @@
     "fluent-ffmpeg": "^2.1.2",
     "jszip": "^3.10.1",
     "moment-timezone": "^0.5.43",
-    "multer": "^1.4.5-lts.1"
+    "multer": "^1.4.5-lts.1",
+    "ytdl-core": "^4.11.3"
   },
   "devDependencies": {
     "nodemon": "^2.0.22"

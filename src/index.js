@@ -30,9 +30,9 @@ app.get('/', function (req, res) {
 
 
 app.post('/convert-single', uploadMulter.single('file'), async function (req, res) {
-
+    console.log(req.body);
     try {
-        let audioBuffer = await convertVideoToMp3(req.file.buffer)
+        let audioBuffer = await convertVideoToMp3(req.file.buffer, req.body.bitrate)
         let fileName = getFileName(req.file.originalname)
         fileName = removeVietnameseTones(fileName)
         res.set('Content-Type', 'audio/mp3');
@@ -47,12 +47,11 @@ app.post('/convert-single', uploadMulter.single('file'), async function (req, re
 
 
 app.post('/convert-multiple', uploadMulter.array('files'), async function (req, res) {
-
     try {
         let zip = new JSZip();
         await Promise.all(
             req.files.map(async (file) => {
-                let audioBuffer = await convertVideoToMp3(file.buffer)
+                let audioBuffer = await convertVideoToMp3(file.buffer, req.body.bitrate)
                 let fileName = getFileName(file.originalname)
                 fileName = removeVietnameseTones(fileName)
                 zip.file(`${fileName}.mp3`, audioBuffer);
@@ -76,6 +75,41 @@ app.post('/convert-multiple', uploadMulter.array('files'), async function (req, 
     }
 })
 
+
+
+app.post('/convert-from-url', async function (req, res) {
+
+    const fs = require('fs');
+    const ytdl = require('ytdl-core');
+
+    const videoUrl = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+    const outputFilePath = 'video.mp4';
+
+    const downloadVideo = async (videoUrl, outputFilePath) => {
+        const videoReadableStream = ytdl(videoUrl, { filter: 'videoandaudio' });
+        const videoWritableStream = fs.createWriteStream(outputFilePath);
+
+        videoReadableStream.pipe(videoWritableStream);
+
+        return new Promise((resolve, reject) => {
+            videoWritableStream.on('finish', () => {
+                resolve();
+            });
+
+            videoWritableStream.on('error', (err) => {
+                reject(err);
+            });
+        });
+    };
+
+    downloadVideo(videoUrl, outputFilePath)
+        .then(() => {
+            console.log('Video downloaded successfully!');
+        })
+        .catch((err) => {
+            console.error('Error downloading video:', err);
+        });
+})
 
 
 
