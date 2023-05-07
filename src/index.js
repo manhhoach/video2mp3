@@ -3,17 +3,21 @@ const app = express()
 const PORT = process.env.PORT || 3000
 require('dotenv').config({})
 const path = require('path')
-
+const fs = require('fs')
 
 const uploadMulter = require('./middlewares/upload')
-const { convertVideoToMp3 } = require('./helpers/convert')
+const { convertVideoToMp3 } = require('./helpers/convertVideoToMp3')
 const { getFileName } = require('./helpers/getFileName')
 const { removeVietnameseTones } = require('./helpers/removeVietnameseTones')
+const { downloadBufferVideo } = require('./helpers/axios')
 
+const axios = require('axios')
+const ytdl = require('ytdl-core');
 const JSZip = require('jszip')
 const { pipeline } = require('stream')
 const { promisify } = require('util')
 const pipelineWithPromisify = promisify(pipeline)
+
 
 app.use(express.static(path.join(__dirname, 'public')))
 app.set('view engine', 'ejs')
@@ -30,7 +34,6 @@ app.get('/', function (req, res) {
 
 
 app.post('/convert-single', uploadMulter.single('file'), async function (req, res) {
-    console.log(req.body);
     try {
         let audioBuffer = await convertVideoToMp3(req.file.buffer, req.body.bitrate)
         let fileName = getFileName(req.file.originalname)
@@ -76,39 +79,22 @@ app.post('/convert-multiple', uploadMulter.array('files'), async function (req, 
 })
 
 
+app.get('/convert-from-url', async function (req, res) {
+    let url = 'https://www.youtube.com/watch?v=6TUOSBPCygs';
+    try {
+        const audioStream = ytdl('6TUOSBPCygs', { filter: 'audioonly' });
+        const audioChunks = [];
 
-app.post('/convert-from-url', async function (req, res) {
+        for await (const chunk of audioStream) {
+            audioChunks.push(chunk);
+        }
 
-    const fs = require('fs');
-    const ytdl = require('ytdl-core');
-
-    const videoUrl = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
-    const outputFilePath = 'video.mp4';
-
-    const downloadVideo = async (videoUrl, outputFilePath) => {
-        const videoReadableStream = ytdl(videoUrl, { filter: 'videoandaudio' });
-        const videoWritableStream = fs.createWriteStream(outputFilePath);
-
-        videoReadableStream.pipe(videoWritableStream);
-
-        return new Promise((resolve, reject) => {
-            videoWritableStream.on('finish', () => {
-                resolve();
-            });
-
-            videoWritableStream.on('error', (err) => {
-                reject(err);
-            });
-        });
-    };
-
-    downloadVideo(videoUrl, outputFilePath)
-        .then(() => {
-            console.log('Video downloaded successfully!');
-        })
-        .catch((err) => {
-            console.error('Error downloading video:', err);
-        });
+        const audioBuffer = Buffer.concat(audioChunks);
+        const filePath = path.join(__dirname, 'audio.mp3');
+        fs.writeFileSync(filePath, audioBuffer)
+    } catch (err) {
+        res.json({ message: err.message })
+    }
 })
 
 

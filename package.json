@@ -12,7 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.306.0",
+    "axios": "^1.4.0",
     "dotenv": "^16.0.3",
     "ejs": "^3.1.9",
     "express": "^4.18.2",
@@ -20,7 +20,7 @@
     "jszip": "^3.10.1",
     "moment-timezone": "^0.5.43",
     "multer": "^1.4.5-lts.1",
-    "ytdl-core": "^4.11.3"
+    "ytdl-core": "^4.11.4"
   },
   "devDependencies": {
     "nodemon": "^2.0.22"
