@@ -4,6 +4,11 @@ const PORT = process.env.PORT || 3000
 require('dotenv').config({})
 const path = require('path')
 const SERVICE_NAME = "VIDEO2MP3"
+const fs=require('fs')
+
+const promMid = require('express-prometheus-middleware');
+const morgan = require('morgan')
+const statusMonitor = require('express-status-monitor');
 
 const uploadMulter = require('./middlewares/upload')
 const { convertVideoToMp3 } = require('./helpers/convertVideoToMp3')
@@ -23,6 +28,15 @@ app.set('views', path.join(__dirname, 'public'))
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
+app.use(morgan('combined', { stream: fs.createWriteStream('./access.log', { flags: 'a' }) }));
+
+app.use(promMid({
+    metricsPath: '/metrics',
+    collectDefaultMetrics: true,
+    requestDurationBuckets: [0.1, 0.5, 1, 1.5],
+}));
+
+app.use(statusMonitor());
 
 
 app.get('/', function (req, res) {
