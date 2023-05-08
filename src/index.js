@@ -5,10 +5,9 @@ require('dotenv').config({})
 const path = require('path')
 const SERVICE_NAME = "VIDEO2MP3"
 const fs=require('fs')
+const contentDisposition = require('content-disposition');
 
-const promMid = require('express-prometheus-middleware');
 const morgan = require('morgan')
-const statusMonitor = require('express-status-monitor');
 
 const uploadMulter = require('./middlewares/upload')
 const { convertVideoToMp3 } = require('./helpers/convertVideoToMp3')
@@ -30,13 +29,6 @@ app.use(express.json())
 
 app.use(morgan('combined', { stream: fs.createWriteStream('./access.log', { flags: 'a' }) }));
 
-app.use(promMid({
-    metricsPath: '/metrics',
-    collectDefaultMetrics: true,
-    requestDurationBuckets: [0.1, 0.5, 1, 1.5],
-}));
-
-app.use(statusMonitor());
 
 
 app.get('/', function (req, res) {
@@ -54,7 +46,7 @@ app.post('/convert-video-to-mp3-single', uploadMulter.single('file'), async func
         fileName = removeVietnameseTones(fileName)
         fileName = addServiceName(fileName)
         res.set('Content-Type', 'audio/mp3');
-        res.set('Content-Disposition', `attachment; filename="${fileName}.mp3"`);
+        res.setHeader('Content-disposition', `${contentDisposition(fileName)}.mp3`);
         res.send(audioBuffer);
 
     } catch (err) {
@@ -102,11 +94,12 @@ app.post('/download-mp3-from-youtube', async function (req, res) {
         ])
         let fileName = `${removeVietnameseTones(videoInfo.videoDetails.title)}`
         fileName = addServiceName(fileName)
-        res.setHeader('Content-disposition', `attachment; filename="${fileName}.mp3"`);
+        res.setHeader('Content-disposition', `${contentDisposition(fileName)}.mp3`);
         res.setHeader('Content-type', 'audio/mp3');
         audioStream.pipe(res);
 
     } catch (err) {
+        console.log(err);
         res.json({ message: err.message })
     }
 })
@@ -121,7 +114,7 @@ app.post('/download-video-from-youtube', async function (req, res) {
         ])
         let fileName = `${removeVietnameseTones(videoInfo.videoDetails.title)}`
         fileName = addServiceName(fileName)
-        res.setHeader('Content-disposition', `attachment; filename="${fileName}.mp4"`);
+        res.setHeader('Content-disposition', `${contentDisposition(fileName)}.mp4`);
         res.setHeader('Content-type', 'video/mp4');
         videoStream.pipe(res);
 
