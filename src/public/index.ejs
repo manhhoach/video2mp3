@@ -1,12 +1,15 @@
 <div class="container" style="display: flex; align-items: center; justify-content: center; flex-direction: column;">
-    <h1>Welcome to File Converter</h1>
+
+    <h1>Welcome to Video2Mp3</h1>
+
     <br>
+
     <div class="form">
         <label style="font-size: 20px;border-bottom: 2px solid #333; padding-bottom: 5px;">Convert video to mp3
             (Single)</label>
         <br>
         <br>
-        <form action="/convert-single" method="POST" enctype="multipart/form-data">
+        <form action="/convert-video-to-mp3-single" method="POST" enctype="multipart/form-data">
             <input type="file" id="myfile" name="file">
             <label>Choose bit rate</label>
             <select name="bitrate">
@@ -19,14 +22,14 @@
     </div>
 
 
-    <br><br><br><br>
+    <br><br><br>
 
     <div class="form">
         <label style="font-size: 20px;border-bottom: 2px solid #333; padding-bottom: 5px;">Convert video to mp3
             (Multiple)</label>
         <br>
         <br>
-        <form action="/convert-multiple" method="POST" enctype="multipart/form-data">
+        <form action="/convert-video-to-mp3-multiple" method="POST" enctype="multipart/form-data">
             <input type="file" id="myfile" name="files" multiple="multiple">
             <label>Choose bit rate</label>
             <select name="bitrate">
@@ -37,6 +40,55 @@
             <button style="margin-left: 2rem;">Convert</button>
         </form>
     </div>
+
+    <br><br><br>
+
+    <div class="form">
+        <label style="font-size: 20px;border-bottom: 2px solid #333; padding-bottom: 5px;">Download mp3 from Youtube</label>
+        <br>
+        <br>
+        <form action="/download-mp3-from-youtube" method="POST">
+            <input type="text" name="url" placeholder="Enter Youtube URL here" style="padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+            color: #333;
+            box-shadow: 0px 0px 5px #ccc;
+            outline: none;
+            width:600px;
+            margin-right: 20px;">
+
+            <label>Choose audio quality</label>
+            <select name="quality">
+                <option value="lowestaudio">Lowest</option>
+                <option value="highestaudio">Highest</option>
+            </select>
+            <button style="margin-left: 2rem;">Download</button>
+        </form>
+    </div>
+
+    <br><br><br>
+
+    <div class="form">
+        <label style="font-size: 20px;border-bottom: 2px solid #333; padding-bottom: 5px;">Download video from Youtube (beta)</label>
+        <br>
+        <br>
+        <form action="/download-video-from-youtube" method="POST">
+            <input type="text" name="url" placeholder="Enter Youtube URL here" style="padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+            color: #333;
+            box-shadow: 0px 0px 5px #ccc;
+            outline: none;
+            width:600px;
+            margin-right: 20px;">
+                
+            </select>
+            <button style="margin-left: 2rem;">Download</button>
+        </form>
+    </div>
+
     <p style="margin-top: auto; text-align: center;position: absolute; bottom: 10">© 2023 - Một sản phẩm của Mạnh Hoạch
     </p>
 </div>

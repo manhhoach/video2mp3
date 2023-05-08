@@ -3,15 +3,13 @@ const app = express()
 const PORT = process.env.PORT || 3000
 require('dotenv').config({})
 const path = require('path')
-const fs = require('fs')
+const SERVICE_NAME = "VIDEO2MP3"
 
 const uploadMulter = require('./middlewares/upload')
 const { convertVideoToMp3 } = require('./helpers/convertVideoToMp3')
 const { getFileName } = require('./helpers/getFileName')
 const { removeVietnameseTones } = require('./helpers/removeVietnameseTones')
-const { downloadBufferVideo } = require('./helpers/axios')
 
-const axios = require('axios')
 const ytdl = require('ytdl-core');
 const JSZip = require('jszip')
 const { pipeline } = require('stream')
@@ -32,12 +30,15 @@ app.get('/', function (req, res) {
 })
 
 
+const addServiceName = (fileName) => `${fileName}-${SERVICE_NAME}`
 
-app.post('/convert-single', uploadMulter.single('file'), async function (req, res) {
+
+app.post('/convert-video-to-mp3-single', uploadMulter.single('file'), async function (req, res) {
     try {
         let audioBuffer = await convertVideoToMp3(req.file.buffer, req.body.bitrate)
         let fileName = getFileName(req.file.originalname)
         fileName = removeVietnameseTones(fileName)
+        fileName = addServiceName(fileName)
         res.set('Content-Type', 'audio/mp3');
         res.set('Content-Disposition', `attachment; filename="${fileName}.mp3"`);
         res.send(audioBuffer);
@@ -49,7 +50,7 @@ app.post('/convert-single', uploadMulter.single('file'), async function (req, re
 
 
 
-app.post('/convert-multiple', uploadMulter.array('files'), async function (req, res) {
+app.post('/convert-video-to-mp3-multiple', uploadMulter.array('files'), async function (req, res) {
     try {
         let zip = new JSZip();
         await Promise.all(
@@ -60,10 +61,10 @@ app.post('/convert-multiple', uploadMulter.array('files'), async function (req, 
                 zip.file(`${fileName}.mp3`, audioBuffer);
             })
         )
-
+        let fileName = addServiceName('convertedFiles')
         res.set({
             'Content-Type': 'application/zip',
-            'Content-Disposition': `attachment; filename=converted.zip`
+            'Content-Disposition': `attachment; filename=${fileName}.zip`
         });
         await pipelineWithPromisify(zip.generateNodeStream({ type: 'nodebuffer' }), res)
 
@@ -79,19 +80,37 @@ app.post('/convert-multiple', uploadMulter.array('files'), async function (req, 
 })
 
 
-app.get('/convert-from-url', async function (req, res) {
-    let url = 'https://www.youtube.com/watch?v=6TUOSBPCygs';
+app.post('/download-mp3-from-youtube', async function (req, res) {
     try {
-        const audioStream = ytdl('6TUOSBPCygs', { filter: 'audioonly' });
-        const audioChunks = [];
+        const [audioStream, videoInfo] = await Promise.all([
+            ytdl(req.body.url, { filter: 'audioonly', quality: req.body.quality, format: 'mp3' }),
+            ytdl.getBasicInfo(req.body.url)
+        ])
+        let fileName = `${removeVietnameseTones(videoInfo.videoDetails.title)}`
+        fileName = addServiceName(fileName)
+        res.setHeader('Content-disposition', `attachment; filename="${fileName}.mp3"`);
+        res.setHeader('Content-type', 'audio/mp3');
+        audioStream.pipe(res);
 
-        for await (const chunk of audioStream) {
-            audioChunks.push(chunk);
-        }
+    } catch (err) {
+        res.json({ message: err.message })
+    }
+})
 
-        const audioBuffer = Buffer.concat(audioChunks);
-        const filePath = path.join(__dirname, 'audio.mp3');
-        fs.writeFileSync(filePath, audioBuffer)
+
+
+app.post('/download-video-from-youtube', async function (req, res) {
+    try {
+        const [videoStream, videoInfo] = await Promise.all([
+            ytdl(req.body.url, { filter: 'videoandaudio', quality: "highest", format: 'mp4' }),
+            ytdl.getBasicInfo(req.body.url)
+        ])
+        let fileName = `${removeVietnameseTones(videoInfo.videoDetails.title)}`
+        fileName = addServiceName(fileName)
+        res.setHeader('Content-disposition', `attachment; filename="${fileName}.mp4"`);
+        res.setHeader('Content-type', 'video/mp4');
+        videoStream.pipe(res);
+
     } catch (err) {
         res.json({ message: err.message })
     }
