@@ -4,13 +4,13 @@ const PORT = process.env.PORT || 3000
 require('dotenv').config({})
 const path = require('path')
 const SERVICE_NAME = "VIDEO2MP3"
-const fs=require('fs')
+const fs = require('fs')
 const contentDisposition = require('content-disposition');
-
 const morgan = require('morgan')
 
+
 const uploadMulter = require('./middlewares/upload')
-const { convertVideoToMp3 } = require('./helpers/convertVideoToMp3')
+const { convertVideoToMp3, convertBitRate, convertResolution } = require('./helpers/ffmpeg')
 const { getFileName } = require('./helpers/getFileName')
 const { removeVietnameseTones } = require('./helpers/removeVietnameseTones')
 
@@ -86,12 +86,16 @@ app.post('/convert-video-to-mp3-multiple', uploadMulter.array('files'), async fu
 })
 
 
+
+
 app.post('/download-mp3-from-youtube', async function (req, res) {
     try {
-        const [audioStream, videoInfo] = await Promise.all([
-            ytdl(req.body.url, { filter: 'audioonly', quality: req.body.quality, format: 'mp3' }),
+        let [audioStream, videoInfo] = await Promise.all([
+            ytdl(req.body.url, { filter: 'audioonly', quality: 'highestaudio', format: 'mp3' }),
             ytdl.getBasicInfo(req.body.url)
         ])
+        audioStream = convertBitRate(audioStream, req.body.bitrate)
+
         let fileName = `${removeVietnameseTones(videoInfo.videoDetails.title)}`
         fileName = addServiceName(fileName)
         res.setHeader('Content-disposition', `${contentDisposition(fileName)}.mp3`);
@@ -99,7 +103,6 @@ app.post('/download-mp3-from-youtube', async function (req, res) {
         audioStream.pipe(res);
 
     } catch (err) {
-        console.log(err);
         res.json({ message: err.message })
     }
 })
@@ -108,10 +111,11 @@ app.post('/download-mp3-from-youtube', async function (req, res) {
 
 app.post('/download-video-from-youtube', async function (req, res) {
     try {
-        const [videoStream, videoInfo] = await Promise.all([
+        let [videoStream, videoInfo] = await Promise.all([
             ytdl(req.body.url, { filter: 'videoandaudio', quality: "highest", format: 'mp4' }),
             ytdl.getBasicInfo(req.body.url)
         ])
+        
         let fileName = `${removeVietnameseTones(videoInfo.videoDetails.title)}`
         fileName = addServiceName(fileName)
         res.setHeader('Content-disposition', `${contentDisposition(fileName)}.mp4`);
