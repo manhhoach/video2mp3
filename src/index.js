@@ -41,13 +41,16 @@ const addServiceName = (fileName) => `${fileName}-${SERVICE_NAME}`
 
 app.post('/convert-video-to-mp3-single', uploadMulter.single('file'), async function (req, res) {
     try {
-        let audioBuffer = await convertVideoToMp3(req.file.buffer, req.body.bitrate)
-        let fileName = getFileName(req.file.originalname)
-        fileName = removeVietnameseTones(fileName)
-        fileName = addServiceName(fileName)
-        res.set('Content-Type', 'audio/mp3');
-        res.setHeader('Content-disposition', `${contentDisposition(fileName)}.mp3`);
-        res.send(audioBuffer);
+        //if (req.file) {
+            let audioBuffer = await convertVideoToMp3(req.file.buffer, req.body.bitrate)
+            let fileName = getFileName(req.file.originalname)
+            fileName = removeVietnameseTones(fileName)
+            fileName = addServiceName(fileName)
+            res.set('Content-Type', 'audio/mp3');
+            res.setHeader('Content-disposition', `${contentDisposition(fileName)}.mp3`);
+            res.send(audioBuffer);
+        //}
+
 
     } catch (err) {
         res.json({ message: err.message })
@@ -58,27 +61,28 @@ app.post('/convert-video-to-mp3-single', uploadMulter.single('file'), async func
 
 app.post('/convert-video-to-mp3-multiple', uploadMulter.array('files'), async function (req, res) {
     try {
-        let zip = new JSZip();
-        await Promise.all(
-            req.files.map(async (file) => {
-                let audioBuffer = await convertVideoToMp3(file.buffer, req.body.bitrate)
-                let fileName = getFileName(file.originalname)
-                fileName = removeVietnameseTones(fileName)
-                zip.file(`${fileName}.mp3`, audioBuffer);
-            })
-        )
-        let fileName = addServiceName('convertedFiles')
-        res.set({
-            'Content-Type': 'application/zip',
-            'Content-Disposition': `attachment; filename=${fileName}.zip`
-        });
-        await pipelineWithPromisify(zip.generateNodeStream({ type: 'nodebuffer' }), res)
+        //if (req.file) {
+            let zip = new JSZip();
+            await Promise.all(
+                req.files.map(async (file) => {
+                    let audioBuffer = await convertVideoToMp3(file.buffer, req.body.bitrate)
+                    let fileName = getFileName(file.originalname)
+                    fileName = removeVietnameseTones(fileName)
+                    zip.file(`${fileName}.mp3`, audioBuffer);
+                })
+            )
+            let fileName = addServiceName('convertedFiles')
+            res.set({
+                'Content-Type': 'application/zip',
+                'Content-Disposition': `attachment; filename=${fileName}.zip`
+            });
+            await pipelineWithPromisify(zip.generateNodeStream({ type: 'nodebuffer' }), res)
 
-        // pipeline(zip.generateNodeStream({ type: 'nodebuffer' }), res, (err)=>{
-        //     if(err)
-        //         res.json({ message: err.message })
-        // });
-
+            // pipeline(zip.generateNodeStream({ type: 'nodebuffer' }), res, (err)=>{
+            //     if(err)
+            //         res.json({ message: err.message })
+            // });
+        //}
 
     } catch (err) {
         res.json({ message: err.message })
@@ -94,7 +98,8 @@ app.post('/download-mp3-from-youtube', async function (req, res) {
             ytdl(req.body.url, { filter: 'audioonly', quality: 'highestaudio', format: 'mp3' }),
             ytdl.getBasicInfo(req.body.url)
         ])
-        audioStream = convertBitRate(audioStream, req.body.bitrate)
+        if (req.body.bitrate == '320')
+            audioStream = convertBitRate(audioStream, req.body.bitrate)
 
         let fileName = `${removeVietnameseTones(videoInfo.videoDetails.title)}`
         fileName = addServiceName(fileName)
@@ -115,7 +120,7 @@ app.post('/download-video-from-youtube', async function (req, res) {
             ytdl(req.body.url, { filter: 'videoandaudio', quality: "highest", format: 'mp4' }),
             ytdl.getBasicInfo(req.body.url)
         ])
-        
+
         let fileName = `${removeVietnameseTones(videoInfo.videoDetails.title)}`
         fileName = addServiceName(fileName)
         res.setHeader('Content-disposition', `${contentDisposition(fileName)}.mp4`);
