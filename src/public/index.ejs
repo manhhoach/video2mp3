@@ -5,17 +5,15 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video to MP3</title>
+    <title>Download, convert and modify mp3 - video2mp3</title>
     <link rel="stylesheet" href="./style.css">
 </head>
 
 <body>
     <div class="div-container">
 
-        <h1>Video to MP3</h1>
-
         <div class="div-form">
-            <label class="content-label">Convert and Modify to mp3 (Single)</label>
+            <label class="content-label">Convert to mp3 or Modify(Single)</label>
             <form action="/to-mp3-single" method="POST" enctype="multipart/form-data">
                 <input type="file" id="myfile" name="file" required>
 
@@ -27,7 +25,7 @@
                 <span>kbps</span>
 
                 <label>Audio volume</label>
-                <input type="number" step="0.1" name="volume" value="1">
+                <input type="number" step="0.1" name="volume" value="1" class="input-volume">
 
                 <button class=" ">Start</button>
             </form>
@@ -35,7 +33,7 @@
 
 
         <div class="div-form">
-            <label class="content-label">Convert and Modify to mp3 (Multiple)</label>
+            <label class="content-label">Convert to mp3 or Modify(Multiple)</label>
             <form action="/to-mp3-multiple" method="POST" enctype="multipart/form-data">
                 <input type="file" id="myfile" name="files" multiple="multiple" required>
                 
@@ -47,12 +45,13 @@
                 <span>kbps</span>
 
                 <label>Audio volume</label>
-                <input type="number" step="0.1" name="volume" value="1">
+                <input type="number" step="0.1" name="volume" value="1" class="input-volume">
 
                 <button class="">Start</button>
             </form>
+            <p class="note">*Applicable to all types of audio and video formats</p>
         </div>
-
+        
 
         <div class="div-form">
             <label class="content-label">Download mp3 from
@@ -68,7 +67,7 @@
                 <span>kbps</span>
 
                 <label>Audio volume</label>
-                <input type="number" step="0.1" name="volume" value="1">
+                <input type="number" step="0.1" name="volume" value="1" class="input-volume">
                 
                 <button class="">Download</button>
             </form>

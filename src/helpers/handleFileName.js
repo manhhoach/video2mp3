@@ -1,4 +1,4 @@
-const SERVICE_NAME = "VIDEO2MP3"
+const SERVICE_NAME = "video2mp3.herokuapp.com";
 
 const addServiceName = (fileName) => `${SERVICE_NAME}-${fileName}`
 
