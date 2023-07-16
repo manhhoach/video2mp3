@@ -15,11 +15,10 @@
     "content-disposition": "^0.5.4",
     "ejs": "^3.1.9",
     "express": "^4.18.2",
-    "express-prometheus-middleware": "^1.2.0",
     "fluent-ffmpeg": "^2.1.2",
     "jszip": "^3.10.1",
     "multer": "^1.4.5-lts.1",
-    "ytdl-core": "^4.11.4"
+    "ytdl-core": "^4.11.5"
   },
   "devDependencies": {
     "nodemon": "^2.0.22"
