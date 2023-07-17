@@ -81,28 +81,18 @@ app.post('/to-mp3-multiple', uploadMulter.array('files'), async function (req, r
 
 
 app.post('/download-mp3-from-youtube', async function (req, res) {
-
-    const worker = new Worker('./src/worker.js', { workerData: req.body.url })
-    worker.on('message', async (data) => {
-        try {
-            if (data.audioYtbBuffer?.length > 0 && data.fileName !== undefined) {
-                let audioInputStream = bufferToStream(data.audioYtbBuffer)
-                let audioOutputStream = convertToMp3(audioInputStream, req.body.bitrate, req.body.volume)
-                let fileName = addServiceName(data.fileName)
-                res.setHeader('Content-disposition', `${contentDisposition(fileName)}.mp3`);
-                res.setHeader('Content-type', 'audio/mp3');
-                audioOutputStream.pipe(res);
-            }
-        } catch (err) {
-            console.log('err in try catch', err);
-            return res.send(err.message ? `Error: ${err.message}` : 'Oops! We ran into some problems.')
-        }
-    })
-    worker.on('error', (err) => {
-        console.log('err in worker', err);
-        return res.send(err.message ? `Error: ${err.message}` : "Oops! We ran into some problems.")
-    })
-
+    try {
+        let { url, bitrate, volume } = req.body
+        let videoInfo = await ytdl.getBasicInfo(url)
+        let fileName = addServiceName(videoInfo.videoDetails.title)
+        let audioYtbStream = ytdl(url, { filter: 'audioonly', quality: 'highestaudio', format: 'mp3' })
+        res.setHeader('Content-type', 'audio/mp3')
+        res.setHeader('Content-disposition', `${contentDisposition(fileName)}.mp3`)
+        convertToMp3(audioYtbStream, bitrate, volume).pipe(res)
+    } catch (err) {
+        console.log('err in try catch', err);
+        return res.send(err.message ? `Error: ${err.message}` : 'Oops! We ran into some problems.')
+    }
 
 })
 
